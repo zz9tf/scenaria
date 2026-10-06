@@ -1,0 +1,7 @@
+id: arc
+name: Arc
+worldId: town
+chapters:
+  - id: ch1
+    scenarioId: no_such_scenario
+    order: 0

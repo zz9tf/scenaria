@@ -1,0 +1,17 @@
+id: university
+name: Northfield University
+description: A mid-sized research university during the fall semester.
+
+metadata:
+  timezone: America/New_York
+
+globalState:
+  semester: fall
+  conferenceActive: false
+  officeOpen: true
+  deadline: "2026-10-10"
+
+characterIds:
+  - professor_miller
+  - sarah_okafor
+  - daniel_reyes

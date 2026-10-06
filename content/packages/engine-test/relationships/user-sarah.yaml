@@ -1,0 +1,11 @@
+id: rel_user_sarah
+participantAId: user
+participantBId: sarah_okafor
+type: peer
+
+state:
+  familiarity: 0.7
+  trust: 0.65
+  warmth: 0.75
+  tension: 0.05
+  powerDifference: 0.15

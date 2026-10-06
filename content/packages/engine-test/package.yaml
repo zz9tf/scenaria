@@ -1,0 +1,33 @@
+id: engine-test
+name: Engine Test Content
+version: 0.1.0
+description: >
+  Throwaway content whose only purpose is to exercise the engine (design §43, §44).
+  It is not a training curriculum and should not grow into one.
+
+worlds:
+  - university
+
+characters:
+  - professor-miller
+  - sarah-okafor
+  - daniel-reyes
+
+relationships:
+  - user-miller
+  - user-sarah
+  - user-daniel
+
+scenarios:
+  - a-deadline-discussion
+  - b-lab-interruption
+  - c-replay-fork
+
+stories:
+  - first-semester
+
+evaluators:
+  - generic-interaction
+
+memories:
+  - seed

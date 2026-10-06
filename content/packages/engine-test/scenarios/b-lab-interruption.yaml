@@ -1,0 +1,162 @@
+# Scenario B (§44): event triggers, hidden goal, memory retrieval.
+id: b_lab_interruption
+name: Lab Interruption
+description: Ask a labmate for help while the room is about to be reclaimed.
+worldId: university
+
+participants:
+  - id: user
+    kind: user
+    displayName: You
+  - id: sarah_okafor
+    kind: npc
+    characterId: sarah_okafor
+    displayName: Sarah
+  - id: daniel_reyes
+    kind: npc
+    characterId: daniel_reyes
+    displayName: Daniel
+
+initialContext: >
+  You need Sarah to take over part of the analysis. She is packing up in the shared lab
+  room. Daniel is somewhere down the hall and the room is booked at the top of the hour.
+
+initialState:
+  helpRequested: false
+  helpAgreed: false
+  interrupted: false
+
+openingMessage:
+  speakerId: sarah_okafor
+  content: Hey. I've got about ten minutes before I have to run - what's up?
+
+onStart:
+  - type: remove_character
+    parameters:
+      characterId: daniel_reyes
+
+goals:
+  - id: user_goal_help
+    ownerId: user
+    description: Get Sarah to commit to taking part of the analysis.
+    priority: 0.9
+    completionCondition:
+      type: state_threshold
+      parameters:
+        path: scenario.helpAgreed
+        operator: "=="
+        value: true
+
+  - id: sarah_hidden_goal
+    ownerId: sarah_okafor
+    description: Protect her own Friday deadline; only help if the ask is bounded and specific.
+    priority: 0.85
+    hidden: true
+
+events:
+  - id: note_request
+    trigger: after_user_message
+    condition:
+      type: intent_present
+      parameters:
+        values: [request]
+    effects:
+      - type: set_state
+        parameters:
+          path: scenario.helpRequested
+          value: true
+
+  - id: daniel_interrupts
+    trigger: before_turn
+    priority: 5
+    condition:
+      all:
+        - type: turn_count
+          parameters:
+            operator: ">="
+            value: 3
+        - type: state_threshold
+          parameters:
+            path: scenario.interrupted
+            operator: "=="
+            value: false
+    effects:
+      - type: add_character
+        parameters:
+          characterId: daniel_reyes
+      - type: set_state
+        parameters:
+          path: scenario.interrupted
+          value: true
+      - type: emit_system_context
+        parameters:
+          content: Daniel leans into the room to say the seminar needs this space now.
+      - type: increment_state
+        parameters:
+          path: conversation.emotionalIntensity
+          amount: 0.2
+
+  - id: daniel_leaves
+    trigger: after_npc_message
+    condition:
+      type: state_threshold
+      parameters:
+        path: scenario.interrupted
+        operator: "=="
+        value: true
+    effects:
+      - type: remove_character
+        parameters:
+          characterId: daniel_reyes
+
+  - id: sarah_agrees
+    trigger: after_user_message
+    once: false
+    condition:
+      all:
+        - type: state_threshold
+          parameters:
+            path: scenario.helpRequested
+            operator: "=="
+            value: true
+        - type: intent_present
+          parameters:
+            values: [commitment, explanation]
+        - type: state_threshold
+          parameters:
+            path: relationships.rel_user_sarah.trust
+            operator: ">="
+            value: 0.6
+    effects:
+      - type: set_state
+        parameters:
+          path: scenario.helpAgreed
+          value: true
+      - type: increment_state
+        parameters:
+          path: relationships.rel_user_sarah.familiarity
+          amount: 0.05
+      - type: create_memory
+        parameters:
+          ownerType: relationship
+          ownerId: rel_user_sarah
+          content: Sarah agreed to take part of the analysis after a bounded, specific ask.
+          importance: 0.7
+          emotionalWeight: 0.3
+          tags: [favour, workload]
+
+completionRules:
+  - type: goal_resolution
+    outcome: completed
+    parameters:
+      goalIds: [user_goal_help]
+  - type: turn_limit
+    outcome: natural_end
+    parameters:
+      limit: 10
+
+evaluators:
+  - evaluatorId: generic_interaction
+
+metadata:
+  tests: [event_triggers, hidden_goal, memory_retrieval, character_entry]

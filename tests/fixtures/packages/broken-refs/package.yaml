@@ -1,0 +1,12 @@
+id: broken-refs
+name: Broken References
+version: 0.0.1
+worlds:
+  - town
+characters:
+  - alice
+scenarios:
+  - broken
+stories:
+  - arc
+evaluators: []

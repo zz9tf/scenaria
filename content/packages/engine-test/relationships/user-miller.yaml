@@ -1,0 +1,11 @@
+id: rel_user_miller
+participantAId: user
+participantBId: professor_miller
+type: advisor_student
+
+state:
+  familiarity: 0.55
+  trust: 0.72
+  warmth: 0.6
+  tension: 0.15
+  powerDifference: 0.8

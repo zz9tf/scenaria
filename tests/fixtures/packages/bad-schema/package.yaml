@@ -1,0 +1,5 @@
+id: bad-schema
+name: Bad Schema
+version: 0.0.1
+characters:
+  - broken

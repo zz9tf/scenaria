@@ -1,0 +1,96 @@
+# Scenario C (§44): branching, state restore, replay. Deliberately short.
+id: c_replay_fork
+name: Replay Fork
+description: A two-beat exchange whose state diverges sharply on the second turn.
+worldId: university
+
+participants:
+  - id: user
+    kind: user
+    displayName: You
+  - id: professor_miller
+    kind: npc
+    characterId: professor_miller
+    displayName: Professor Miller
+
+initialContext: >
+  Professor Miller asks, in passing, whether the figures in the draft are final. The
+  honest answer and the convenient answer lead to different conversations.
+
+initialState:
+  claimedFinal: false
+  admittedDraft: false
+
+openingMessage:
+  speakerId: professor_miller
+  content: Quick one - are the figures in the draft final?
+
+goals:
+  - id: user_goal_answer
+    ownerId: user
+    description: Leave the exchange with an accurate shared understanding of the draft.
+    priority: 0.8
+    completionCondition:
+      any:
+        - type: state_threshold
+          parameters:
+            path: scenario.admittedDraft
+            operator: "=="
+            value: true
+        - type: state_threshold
+          parameters:
+            path: scenario.claimedFinal
+            operator: "=="
+            value: true
+
+events:
+  - id: branch_admission
+    trigger: after_user_message
+    once: false
+    condition:
+      type: topic_mentioned
+      parameters:
+        values: [draft, provisional, preliminary, placeholder]
+    effects:
+      - type: set_state
+        parameters:
+          path: scenario.admittedDraft
+          value: true
+      - type: increment_state
+        parameters:
+          path: relationships.rel_user_miller.trust
+          amount: 0.1
+
+  - id: branch_overclaim
+    trigger: after_user_message
+    once: false
+    condition:
+      all:
+        - type: intent_present
+          parameters:
+            values: [commitment]
+        - not:
+            type: topic_mentioned
+            parameters:
+              values: [draft, provisional, preliminary, placeholder]
+    effects:
+      - type: set_state
+        parameters:
+          path: scenario.claimedFinal
+          value: true
+      - type: increment_state
+        parameters:
+          path: relationships.rel_user_miller.tension
+          amount: 0.12
+
+completionRules:
+  - type: turn_limit
+    outcome: natural_end
+    parameters:
+      limit: 4
+
+evaluators:
+  - evaluatorId: generic_interaction
+
+metadata:
+  tests: [branching, state_restore, replay]

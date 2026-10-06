@@ -1,0 +1,134 @@
+# Scenario A (§44): basic multi-turn dialogue, NPC goals, relationship state changes.
+id: a_deadline_discussion
+name: Deadline Discussion
+description: Ask an advisor for two more days on a promised analysis.
+worldId: university
+
+participants:
+  - id: user
+    kind: user
+    displayName: You
+  - id: professor_miller
+    kind: npc
+    characterId: professor_miller
+    displayName: Professor Miller
+
+initialContext: >
+  You promised Professor Miller an analysis by tonight. The work is not finished and you
+  need two more days. She is in her office between meetings.
+
+initialState:
+  planRequested: false
+  newDeadlineAgreed: false
+
+openingMessage:
+  speakerId: professor_miller
+  content: You wanted to talk before I head to the faculty meeting. What's the status?
+
+goals:
+  - id: user_goal
+    ownerId: user
+    description: Secure an extension to the analysis deadline.
+    priority: 0.9
+    hidden: false
+    completionCondition:
+      type: state_threshold
+      parameters:
+        path: scenario.newDeadlineAgreed
+        operator: "=="
+        value: true
+
+  - id: npc_goal
+    ownerId: professor_miller
+    description: Determine whether the student has a realistic completion plan.
+    priority: 0.8
+    hidden: true
+    completionCondition:
+      all:
+        - type: state_threshold
+          parameters:
+            path: scenario.planRequested
+            operator: "=="
+            value: true
+        - type: intent_present
+          parameters:
+            values: [commitment, explanation]
+
+rules:
+  - id: no_instant_yes
+    description: >
+      Do not agree to a new deadline until the other person has named a specific date and
+      what will be different about it.
+    appliesTo: [professor_miller]
+
+events:
+  - id: ask_for_plan
+    trigger: after_user_message
+    priority: 10
+    condition:
+      all:
+        - type: turn_count
+          parameters:
+            operator: ">="
+            value: 2
+        - type: state_threshold
+          parameters:
+            path: scenario.planRequested
+            operator: "=="
+            value: false
+    effects:
+      - type: set_state
+        parameters:
+          path: scenario.planRequested
+          value: true
+      - type: emit_system_context
+        parameters:
+          content: Professor Miller now wants a specific date and a concrete plan.
+
+  - id: tension_on_vagueness
+    trigger: after_user_message
+    once: false
+    condition:
+      type: signal_threshold
+      parameters:
+        signal: uncertainty
+        operator: ">="
+        value: 0.6
+    effects:
+      - type: increment_state
+        parameters:
+          path: relationships.rel_user_miller.tension
+          amount: 0.08
+
+  - id: trust_on_commitment
+    trigger: after_user_message
+    once: false
+    condition:
+      type: intent_present
+      parameters:
+        values: [commitment]
+    effects:
+      - type: increment_state
+        parameters:
+          path: relationships.rel_user_miller.trust
+          amount: 0.05
+      - type: set_state
+        parameters:
+          path: scenario.newDeadlineAgreed
+          value: true
+
+completionRules:
+  - type: goal_resolution
+    outcome: completed
+    parameters:
+      goalIds: [user_goal]
+  - type: turn_limit
+    outcome: natural_end
+    parameters:
+      limit: 10
+
+evaluators:
+  - evaluatorId: generic_interaction
+
+metadata:
+  tests: [multi_turn, npc_goals, relationship_state]

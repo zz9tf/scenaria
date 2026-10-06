@@ -1,0 +1,200 @@
+// Runtime instance storage only. Content definitions (worlds, characters, scenarios, ...)
+// live in YAML content packages and are never written to the database (§39).
+//
+// SQLite keeps the MVP runnable with no external services. To move to PostgreSQL (§36),
+// change `provider` to "postgresql" and repoint DATABASE_URL; no model changes are needed.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  externalId  String   @unique
+  displayName String
+  createdAt   DateTime @default(now())
+
+  scenarioInstances ScenarioInstance[]
+}
+
+model WorldInstance {
+  id                String   @id @default(cuid())
+  packageId         String
+  worldDefinitionId String
+  globalState       Json
+  createdAt         DateTime @default(now())
+
+  characters        CharacterInstance[]
+  relationships     RelationshipInstance[]
+  memories          Memory[]
+  scenarioInstances ScenarioInstance[]
+
+  @@unique([packageId, worldDefinitionId])
+}
+
+model CharacterInstance {
+  id                    String   @id @default(cuid())
+  worldInstanceId       String
+  characterDefinitionId String
+  /// Mutable per-instance overlay on top of the character definition.
+  state                 Json
+  createdAt             DateTime @default(now())
+
+  worldInstance WorldInstance @relation(fields: [worldInstanceId], references: [id], onDelete: Cascade)
+
+  @@unique([worldInstanceId, characterDefinitionId])
+}
+
+model RelationshipInstance {
+  id                       String   @id @default(cuid())
+  worldInstanceId          String
+  relationshipDefinitionId String
+  participantAId           String
+  participantBId           String
+  type                     String?
+  state                    Json
+  history                  Json
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  worldInstance WorldInstance @relation(fields: [worldInstanceId], references: [id], onDelete: Cascade)
+
+  @@unique([worldInstanceId, relationshipDefinitionId])
+}
+
+model Memory {
+  id                   String   @id @default(cuid())
+  worldInstanceId      String
+  ownerType            String
+  ownerId              String
+  content              String
+  type                 String?
+  importance           Float
+  emotionalWeight      Float?
+  tags                 Json
+  sourceConversationId String?
+  sourceMessageIds     Json
+  createdAt            DateTime @default(now())
+
+  worldInstance WorldInstance @relation(fields: [worldInstanceId], references: [id], onDelete: Cascade)
+
+  @@index([worldInstanceId, ownerType, ownerId])
+}
+
+model ScenarioInstance {
+  id                   String    @id @default(cuid())
+  packageId            String
+  scenarioDefinitionId String
+  worldInstanceId      String?
+  userId               String?
+  status               String    @default("active")
+  outcome              String?
+  createdAt            DateTime  @default(now())
+  completedAt          DateTime?
+
+  worldInstance WorldInstance? @relation(fields: [worldInstanceId], references: [id], onDelete: SetNull)
+  user          User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  conversations Conversation[]
+  goalStates    GoalState[]
+}
+
+model Conversation {
+  id                   String    @id @default(cuid())
+  scenarioInstanceId   String
+  /// Self-id for a trunk conversation; the trunk's id for every branch (§23).
+  rootConversationId   String
+  parentConversationId String?
+  branchFromMessageId  String?
+  participantIds       Json
+  status               String    @default("active")
+  startedAt            DateTime  @default(now())
+  completedAt          DateTime?
+
+  scenarioInstance ScenarioInstance @relation(fields: [scenarioInstanceId], references: [id], onDelete: Cascade)
+  parent           Conversation?    @relation("ConversationBranches", fields: [parentConversationId], references: [id], onDelete: SetNull)
+  branches         Conversation[]   @relation("ConversationBranches")
+  messages         Message[]
+  snapshots        StateSnapshot[]
+  eventLogs        EventLog[]
+  evaluations      Evaluation[]
+  goalStates       GoalState[]
+
+  @@index([rootConversationId])
+}
+
+model Message {
+  id                    String   @id @default(cuid())
+  conversationId        String
+  turnIndex             Int
+  senderId              String
+  senderKind            String
+  content               String
+  tone                  String?
+  analysis              Json?
+  actionPlan            Json?
+  stateSnapshotBeforeId String?
+  stateSnapshotAfterId  String?
+  createdAt             DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, turnIndex])
+}
+
+model StateSnapshot {
+  id             String   @id @default(cuid())
+  conversationId String
+  turnIndex      Int
+  state          Json
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, turnIndex])
+}
+
+model GoalState {
+  id                 String   @id @default(cuid())
+  scenarioInstanceId String
+  conversationId     String
+  goalId             String
+  ownerId            String
+  status             String
+  updatedAt          DateTime @updatedAt
+
+  scenarioInstance ScenarioInstance @relation(fields: [scenarioInstanceId], references: [id], onDelete: Cascade)
+  conversation     Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, goalId])
+}
+
+model EventLog {
+  id             String   @id @default(cuid())
+  conversationId String
+  turnIndex      Int
+  eventId        String
+  trigger        String
+  appliedEffects Json
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}
+
+model Evaluation {
+  id             String   @id @default(cuid())
+  conversationId String
+  evaluatorId    String
+  result         Json
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}

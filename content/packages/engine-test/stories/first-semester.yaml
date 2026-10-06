@@ -1,0 +1,20 @@
+id: first_semester
+name: First Semester
+worldId: university
+
+chapters:
+  - id: chapter_a
+    scenarioId: a_deadline_discussion
+    order: 0
+  - id: chapter_b
+    scenarioId: b_lab_interruption
+    order: 1
+    unlockCondition:
+      type: state_threshold
+      parameters:
+        path: relationships.rel_user_miller.trust
+        operator: ">="
+        value: 0.6
+  - id: chapter_c
+    scenarioId: c_replay_fork
+    order: 2

@@ -1,0 +1,4 @@
+id: alice
+name: Alice
+profile:
+  summary: A placeholder character for validator tests.

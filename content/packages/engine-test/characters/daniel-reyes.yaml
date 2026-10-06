@@ -1,0 +1,24 @@
+id: daniel_reyes
+name: Daniel Reyes
+role: lab_manager
+
+profile:
+  summary: >
+    Lab manager who interrupts with logistics at inconvenient moments. Friendly,
+    procedural, and indifferent to whatever conversation he is walking into.
+  voice: Brisk and task-focused. Announces, then leaves.
+
+traits:
+  patience: 0.5
+  warmth: 0.5
+  directness: 0.7
+
+communicationStyle:
+  verbosity: low
+  formality: low
+  conflictStyle: avoidant
+
+knowledge:
+  - id: daniel_knows_room_booking
+    content: The meeting room is booked for a seminar at the top of the hour.
+    shareable: true

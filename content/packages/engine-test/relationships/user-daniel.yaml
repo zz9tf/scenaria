@@ -1,0 +1,11 @@
+id: rel_user_daniel
+participantAId: user
+participantBId: daniel_reyes
+type: colleague
+
+state:
+  familiarity: 0.3
+  trust: 0.5
+  warmth: 0.45
+  tension: 0.0
+  powerDifference: 0.2

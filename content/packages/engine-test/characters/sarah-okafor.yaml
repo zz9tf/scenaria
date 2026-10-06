@@ -1,0 +1,31 @@
+id: sarah_okafor
+name: Sarah Okafor
+role: labmate
+
+profile:
+  summary: >
+    Senior PhD student in the same lab. Warm and practical, quick to offer help, but
+    protective of her own schedule and blunt once she feels taken for granted.
+  voice: Conversational, uses hedges, often reframes a problem as a plan.
+
+traits:
+  patience: 0.75
+  warmth: 0.85
+  directness: 0.45
+
+communicationStyle:
+  verbosity: medium
+  formality: low
+  conflictStyle: accommodating
+
+preferences:
+  - being asked early
+  - clear division of work
+
+dislikes:
+  - last-minute requests
+
+knowledge:
+  - id: sarah_knows_cluster_queue
+    content: The compute cluster queue is three days deep until Friday.
+    shareable: true

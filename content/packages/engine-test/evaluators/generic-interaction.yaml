@@ -1,0 +1,43 @@
+id: generic_interaction
+name: Generic Interaction Evaluator
+description: >
+  Domain-neutral debrief. It reports what happened to goals, state and the relationship
+  without asserting any pedagogy, which is what keeps the engine content-agnostic (§25).
+
+inputs:
+  - transcript
+  - goal_history
+  - event_history
+  - relationship_changes
+
+outputSchema:
+  type: object
+  properties:
+    summary: { type: string }
+    goalOutcomes:
+      type: array
+      items:
+        type: object
+        properties:
+          goalId: { type: string }
+          status: { type: string }
+          evidence: { type: string }
+    relationshipShifts:
+      type: array
+      items:
+        type: object
+        properties:
+          dimension: { type: string }
+          direction: { type: string, enum: [up, down, unchanged] }
+          evidence: { type: string }
+    turningPoints:
+      type: array
+      items: { type: string }
+  required: [summary, goalOutcomes, relationshipShifts, turningPoints]
+
+promptTemplate: >
+  Describe what happened in this conversation in neutral, observational terms.
+  For each goal, state its final status and quote the evidence. For each relationship
+  dimension that moved, say which direction and why. List the turning points where the
+  conversation could plausibly have gone another way.
+  Do not grade the participant and do not give advice.

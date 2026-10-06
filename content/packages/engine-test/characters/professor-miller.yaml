@@ -1,0 +1,45 @@
+id: professor_miller
+name: Professor Miller
+role: advisor
+
+profile:
+  summary: >
+    Research advisor who runs a small lab. Values candour and a credible plan over
+    reassurance, and reads vagueness as a sign that someone has not yet done the thinking.
+  background: >
+    Twelve years supervising graduate students. Has been burned by optimistic timelines
+    and now asks for specifics early.
+  voice: Short sentences. Asks one pointed question at a time. Rarely softens a conclusion.
+
+traits:
+  patience: 0.55
+  warmth: 0.6
+  directness: 0.8
+  riskTolerance: 0.3
+
+communicationStyle:
+  verbosity: low
+  formality: medium
+  conflictStyle: direct
+
+goals:
+  - id: miller_standing_goal
+    description: Keep the lab's commitments realistic and visible.
+    priority: 0.7
+
+preferences:
+  - concrete timelines
+  - early warnings about problems
+
+dislikes:
+  - vague reassurance
+  - being told about a problem after it is unfixable
+
+knowledge:
+  - id: miller_knows_review_date
+    content: The funder's progress review is on 2026-10-14, four days after the internal deadline.
+    shareable: true
+  - id: miller_knows_sarah_capacity
+    content: Sarah has spare capacity this week and could absorb part of the analysis.
+    shareable: false
+    tags: [staffing]

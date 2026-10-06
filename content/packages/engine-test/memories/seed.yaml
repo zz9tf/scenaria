@@ -1,0 +1,32 @@
+- ownerType: relationship
+  ownerId: rel_user_miller
+  content: >
+    The user previously missed an agreed deadline but apologised and delivered two days
+    later with a working result.
+  type: episode
+  importance: 0.8
+  emotionalWeight: -0.2
+  tags: [deadline, reliability]
+
+- ownerType: character
+  ownerId: professor_miller
+  content: >
+    Two students in a row underestimated data-cleaning time this semester.
+  type: pattern
+  importance: 0.6
+  tags: [timeline, estimation]
+
+- ownerType: relationship
+  ownerId: rel_user_sarah
+  content: The user covered Sarah's lab shift on short notice in September.
+  type: episode
+  importance: 0.55
+  emotionalWeight: 0.4
+  tags: [favour, reciprocity]
+
+- ownerType: world
+  ownerId: university
+  content: The funder's progress review is scheduled four days after the internal deadline.
+  type: fact
+  importance: 0.7
+  tags: [deadline, funding]
